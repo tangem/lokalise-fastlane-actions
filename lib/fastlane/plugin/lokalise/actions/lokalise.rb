@@ -72,9 +72,9 @@ module Fastlane
             unzip_file("lokalisetmp/a.zip", destination, clean_destination)
             FileUtils.remove_dir("lokalisetmp")
 
-            # Always sort all string files (which in turn adds EOF to the end of those files), 
+            # Sort all string files (which in turn adds EOF to the end of those files),
             # since Lokalise only supports the `add_newline_eof` option for PHP and JSON file formats
-            exec("CI=false ./Utilites/sort-strings.sh")
+            exec("command -v ./Utilites/sort-strings.sh &> /dev/null && CI=false ./Utilites/sort-strings.sh")
 
             UI.success "Localizations extracted to #{destination} 📗 📕 📘"
           else
