@@ -4,6 +4,8 @@ source('https://rubygems.org')
 gem 'bundler'
 # Automation tool for mobile developers.
 gem 'fastlane', '>= 2.225.0'
+# SimpleCov is a code coverage analysis tool for Ruby.
+gem 'simplecov'
 
 gemspec
 
