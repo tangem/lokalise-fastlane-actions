@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.email         = 'afedorov@tangem.co'
 
   spec.summary       = 'TBD'
-  # spec.homepage      = "https://github.com/<GITHUB_USERNAME>/fastlane-plugin-lokalise"
+  spec.homepage      = "https://github.com/tangem/lokalise-fastlane-actions"
   spec.license       = "MIT"
 
   spec.files         = Dir["lib/**/*"] + %w(README.md LICENSE)
