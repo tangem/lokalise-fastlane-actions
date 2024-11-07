@@ -1,3 +1,5 @@
+# https://github.com/lokalise/lokalise-fastlane-actions
+
 module Fastlane
   module Actions
     class LokaliseAction < Action
@@ -10,17 +12,27 @@ module Fastlane
         clean_destination = params[:clean_destination]
         include_comments = params[:include_comments]
         original_filenames = params[:use_original]
+        export_empty_as = params[:export_empty_as] || "base"
+        export_sort = params[:export_sort] || "first_added"
+        replace_breaks = params[:replace_breaks] || false
+        add_newline_eof = params[:add_newline_eof] || false
+        filter_data = params[:filter_data]
 
         body = {
           format: "ios_sdk",
           original_filenames: original_filenames,
           bundle_filename: "Localization.zip",
           bundle_structure: "%LANG_ISO%.lproj/Localizable.%FORMAT%",
-          export_empty_as: "base",
-          export_sort: "first_added",
+          export_empty_as: export_empty_as,
+          export_sort: export_sort,
           include_comments: include_comments,
-          replace_breaks: false
+          replace_breaks: replace_breaks,
+          add_newline_eof: add_newline_eof
         }
+
+        if !filter_data.to_s.empty?
+          body["filter_data"] = [filter_data]
+        end
 
         filter_langs = params[:languages]
         if filter_langs.kind_of? Array then
@@ -59,6 +71,11 @@ module Fastlane
             }
             unzip_file("lokalisetmp/a.zip", destination, clean_destination)
             FileUtils.remove_dir("lokalisetmp")
+
+            # Sort all string files (which in turn adds EOF to the end of those files),
+            # since Lokalise only supports the `add_newline_eof` option for PHP and JSON file formats
+            exec("command -v ./Utilites/sort-strings.sh &> /dev/null && CI=false ./Utilites/sort-strings.sh")
+
             UI.success "Localizations extracted to #{destination} 📗 📕 📘"
           else
             UI.error "Response did not include ZIP"
@@ -158,6 +175,44 @@ module Fastlane
                                         is_string: false,
                                         verify_block: proc do |value|
                                           UI.user_error! "Tags should be passed as array" unless value.kind_of? Array
+                                        end),
+            FastlaneCore::ConfigItem.new(key: :export_empty_as,
+                                        description: "How to export empty strings",
+                                        optional: true,
+                                        is_string: true,
+                                        default_value: "base",
+                                        verify_block: proc do |value|
+                                          UI.user_error! "Use one of options: empty, base, skip, null." unless ['empty', 'base', 'skip', 'null'].include?(value)
+                                        end),
+            FastlaneCore::ConfigItem.new(key: :export_sort,
+                                        description: "Export key sort mode. Allowed values are first_added, last_added, last_updated, a_z, z_a",
+                                        optional: true,
+                                        is_string: true,
+                                        verify_block: proc do |value|
+                                          UI.user_error! "Should be a String" unless value.kind_of? String
+                                        end),
+            FastlaneCore::ConfigItem.new(key: :replace_breaks,
+                                        description: "Replace breaks",
+                                        optional: true,
+                                        is_string: false,
+                                        default_value: false,
+                                        verify_block: proc do |value|
+                                          UI.user_error! "Replace break should be true or false" unless [true, false].include? value
+                                        end),
+            FastlaneCore::ConfigItem.new(key: :add_newline_eof,
+                                        description: "Enable to add new line at end of file (if supported by format)",
+                                        optional: true,
+                                        is_string: false,
+                                        default_value: false,
+                                        verify_block: proc do |value|
+                                          UI.user_error! "Add newline EOF should be true or false" unless [true, false].include? value
+                                        end),
+            FastlaneCore::ConfigItem.new(key: :filter_data,
+                                        description: "Narrow export data range. Allowed values are translated or untranslated, reviewed (or reviewed_only), last_reviewed_only, verified and nonhidden",
+                                        optional: true,
+                                        is_string: true,
+                                        verify_block: proc do |value|
+                                          UI.user_error! "Should be a String" unless value.kind_of? String
                                         end),
 
         ]
