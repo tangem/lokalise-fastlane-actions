@@ -16,7 +16,7 @@ module Fastlane
         export_sort = params[:export_sort] || "first_added"
         replace_breaks = params[:replace_breaks] || false
         add_newline_eof = params[:add_newline_eof] || false
-        escape_percent = params[:escape_percent || false
+        escape_percent = params[:escape_percent] || false
         filter_data = params[:filter_data]
 
         body = {
