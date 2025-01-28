@@ -16,6 +16,7 @@ module Fastlane
         export_sort = params[:export_sort] || "first_added"
         replace_breaks = params[:replace_breaks] || false
         add_newline_eof = params[:add_newline_eof] || false
+        escape_percent = params[:escape_percent || false
         filter_data = params[:filter_data]
 
         body = {
@@ -27,6 +28,7 @@ module Fastlane
           export_sort: export_sort,
           include_comments: include_comments,
           replace_breaks: replace_breaks,
+          escape_percent: escape_percent,
           add_newline_eof: add_newline_eof
         }
 
@@ -206,6 +208,14 @@ module Fastlane
                                         default_value: false,
                                         verify_block: proc do |value|
                                           UI.user_error! "Add newline EOF should be true or false" unless [true, false].include? value
+                                        end),
+            FastlaneCore::ConfigItem.new(key: :escape_percent,
+                                        description: "When enabled, all universal percent placeholders '[%]' will be always exported as '%%'",
+                                        optional: true,
+                                        is_string: false,
+                                        default_value: false,
+                                        verify_block: proc do |value|
+                                          UI.user_error! "Escape percent should be true or false" unless [true, false].include? value
                                         end),
             FastlaneCore::ConfigItem.new(key: :filter_data,
                                         description: "Narrow export data range. Allowed values are translated or untranslated, reviewed (or reviewed_only), last_reviewed_only, verified and nonhidden",
